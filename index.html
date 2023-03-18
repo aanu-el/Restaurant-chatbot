@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+
       .heading {
         margin: 0;
         padding: 10px;
@@ -16,7 +20,7 @@
       .chatbot {
         width: 100%;
         max-width: 400px;
-        min-height: 50vh;
+        /* height: 60vh; */
         border: 1px solid #ccc;
         border-radius: 10px;
         overflow: hidden;
@@ -39,7 +43,6 @@
       }
 
       .messages {
-        min-height: 100px;
         flex: 1;
         overflow-y: scroll;
         display: flex;
@@ -130,8 +133,8 @@
         <button type="submit">Send</button>
       </form>
     </div>
-
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+
     <script>
       const socket = io();
       let customer_session_data = "";
