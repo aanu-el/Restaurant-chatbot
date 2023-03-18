@@ -4,25 +4,180 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <link rel="stylesheet" href="style.css" />
+    <style>
+      .heading {
+        margin: 0;
+        padding: 10px;
+        background-color: #002866;
+        color: #fff;
+        text-align: center;
+      }
+
+      .chatbot {
+        width: 100%;
+        max-width: 400px;
+        min-height: 50vh;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        margin: 0 auto;
+      }
+
+      @media (min-width: 768px) {
+        .chatbot {
+          max-width: 600px;
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .chatbot {
+          max-width: 800px;
+        }
+      }
+
+      .messages {
+        flex: 1;
+        overflow-y: scroll;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+
+      .message {
+        margin: 10px;
+        padding: 10px;
+        border-radius: 10px;
+        max-width: 80%;
+      }
+
+      .received {
+        background-color: #f2f2f2;
+        align-self: flex-start;
+      }
+
+      .sent {
+        background-color: #002866;
+        color: #fff;
+        text-align: right;
+        align-self: flex-end;
+      }
+
+      .input {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .input input {
+        padding: 10px;
+        height: 50px;
+        border: none;
+        border-radius: 10px;
+        outline: none;
+        margin: 10px;
+        resize: none;
+        overflow-y: auto;
+        background-color: #fff;
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.1) inset;
+        transtion: box-shadow 0.2s ease-in-out;
+      }
+
+      .input input:focus {
+        box-shadow: 0 0 3px #002866 inset;
+      }
+
+      .input button {
+        margin-left: 10px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 10px;
+        background-color: #002866;
+        color: #fff;
+        cursor: pointer;
+        align-self: flex-end;
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+
+      .input button:hover {
+        background-color: #3764a6;
+      }
+    </style>
 
     <title>ChatBot</title>
   </head>
   <body>
     <div class="chatbot">
       <h2 class="heading">Fave Restaurant</h2>
-      <div class="messages">
-        <div class="message received">
-          <p>Hello! Welcome to Fave's Restaurant. How can I help you today?</p>
-        </div>
-        <div class="message sent">
-          <p>Hi, I have a question about my account.</p>
-        </div>
+
+      <div class="messages" id="messages">
+        <!-- <div class="message received"></div>
+        <div class="message sent"></div> -->
       </div>
-      <form class="input" action="#" method="post">
-        <input type="text" placeholder="Type your message here" />
+
+      <form class="input" id="form">
+        <input
+          type="text"
+          name="option"
+          id="option"
+          placeholder="Type your message here"
+        />
         <button type="submit">Send</button>
       </form>
     </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+      const socket = io();
+
+      const appendEvent = (message) => {
+        const messagesWrapper = document.getElementById("messages");
+        const div = document.createElement("div");
+        div.setAttribute("class", "message received");
+        const p = document.createElement("p");
+        p.textContent = `${message}`;
+        div.appendChild(p);
+        messagesWrapper.appendChild(div);
+      };
+
+      socket.on("bot_welcome_msg", (data) => {
+        const { message } = data;
+        appendEvent(message);
+      });
+
+      socket.on("bot_options_msg", (data) => {
+        const { message } = data;
+        appendEvent(message);
+      });
+
+      // Returns a list of options to select from
+      socket.on("bot_options", (data) => {
+        const messagesWrapper = document.getElementById("messages");
+        const optionsDiv = document.createElement("div");
+        optionsDiv.setAttribute("class", "message received");
+        const message = JSON.parse(data);
+
+        for (let key in message) {
+          const p = document.createElement("p");
+          p.textContent = `Select ${key} to "${message[key]}"`;
+          optionsDiv.appendChild(p);
+        }
+
+        messagesWrapper.appendChild(optionsDiv);
+      });
+
+      // When the customer picks an option
+      const form = document.getElementById("form");
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const option = formData.get("option");
+
+        socket.emit("customerOptions", option);
+      });
+    </script>
   </body>
 </html>
