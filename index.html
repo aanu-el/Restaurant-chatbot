@@ -134,6 +134,7 @@
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script>
       const socket = io();
+      let customer_session_data = "";
 
       const appendBotMessage = (message) => {
         const messagesWrapper = document.getElementById("messages");
@@ -166,10 +167,18 @@
         messagesWrapper.appendChild(div);
       };
 
-      // Bot messages
+      /**
+       *  Bot messages
+       * */
       socket.on("bot_msg", (data) => {
         const { message } = data;
         appendBotMessage(message);
+      });
+
+      // Handle bot error messages
+      socket.on("bot_error_msg", (data) => {
+        const { message } = data;
+        appendBotErrorMessage(message);
       });
 
       // Returns a list of options to select from
@@ -188,20 +197,28 @@
         messagesWrapper.appendChild(optionsDiv);
       });
 
-      // Handle bot error messages
-      socket.on("bot_error_msg", (data) => {
-        const { message } = data;
-        appendBotErrorMessage(message);
+      // Gets and store session data
+      socket.on("session_data", (data) => {
+        const session = JSON.parse(data);
+        customer_session_data = session;
       });
 
-      // When the customer picks an option
+      // From handling when the customer picks an option
       const form = document.getElementById("form");
       const input = document.getElementById("input");
       form.addEventListener("submit", (event) => {
         event.preventDefault();
 
+        console.log(customer_session_data);
         if (input.value) {
           const data = input.value;
+
+          if (customer_session_data.action == "1") {
+            socket.emit("selected_item", data);
+            input.value = "";
+            return;
+          }
+
           socket.emit("selected_options", data);
           appendCustomerMessage(data);
           input.value = "";
@@ -225,8 +242,6 @@
 
         messagesWrapper.appendChild(optionsDiv);
       });
-
-      
     </script>
   </body>
 </html>
