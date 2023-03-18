@@ -3,6 +3,9 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 
+require('dotenv').config();
+const PORT = process.env.PORT
+
 // Socket.io connection
 const { Server } = require("socket.io");
 const io = new Server(server);
@@ -115,21 +118,21 @@ io.on('connection', (socket) => {
                         socket.emit('session_data', `${JSON.stringify(sessions[session])}`);
                     } else {
                         socket.emit('bot_msg', { message: 'No order found.' });
-
-                        // socket.emit('session_data', `${JSON.stringify(sessions[session])}`);
                     }
                     break;
                 case '0':
                     sessions[session].action = option;
 
-                    sessions[session].order = null;
-                    socket.emit('bot_msg', { message: 'Order Cancelled!' })
-                    socket.emit('bot_msg', { message: 'Create another Order by selecting an option below:' });
-                    socket.emit('bot_items', `${JSON.stringify(items)}`);
-
-                    sessions[session].action = '1';
-
-                    socket.emit('session_data', `${JSON.stringify(sessions[session])}`);
+                    if (sessions[session].order) {
+                        sessions[session].order = null;
+                        socket.emit('bot_msg', { message: 'Order Cancelled!' })
+                        socket.emit('bot_msg', { message: 'Create Order by selecting an option 1' });
+                        socket.emit('bot_options', `${JSON.stringify(options)}`);
+                    } else {
+                        socket.emit('bot_msg', { message: 'No order found.' });
+                        socket.emit('bot_msg', { message: 'Create Order by selecting an option 1' });
+                        socket.emit('bot_options', `${JSON.stringify(options)}`);
+                    }
             }
         }
     })
@@ -182,6 +185,6 @@ io.on('connection', (socket) => {
 
 });
 
-server.listen(3000, () => {
-    console.log('listening on *:3000');
+server.listen(PORT, () => {
+    console.log('listening on *:', PORT);
 });
