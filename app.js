@@ -54,12 +54,11 @@ io.on('connection', (socket) => {
         console.log("client disconnected", socket.id);
     });
 
-
     socket.on('selected_options', (data) => {
 
         if (session && sessions[session]) {
             const option = data;
-            // validate the input data
+
             if (!(option in options)) {
                 socket.emit('bot_error_msg', { message: "Invalid option! Please select a valid number from below" })
                 socket.emit('bot_options', `${JSON.stringify(options)}`);
@@ -68,11 +67,17 @@ io.on('connection', (socket) => {
             // Handle the requests
             switch (option) {
                 case '1':
+                    sessions[session].action = option;
+
                     socket.emit('bot_msg', { message: 'Please select an item to order:' });
                     socket.emit('bot_items', `${JSON.stringify(items)}`);
+
                     sessions[session].order = [];
+
+                    socket.emit('session_data', `${JSON.stringify(sessions[session])}`);
                     break;
                 case '99':
+                    sessions[session].action = option;
                     if (sessions[session].order && sessions[session].order.length != 0) {
                         sessions[session].orders = sessions[session].orders || [];
                         sessions[session].orders.push(sessions[session].order);
@@ -81,36 +86,54 @@ io.on('connection', (socket) => {
                         socket.emit('bot_msg', { message: 'Please select an item to order:' });
                         socket.emit('bot_items', `${JSON.stringify(items)}`);
 
+                        sessions[session].action = '1';
+
+                        socket.emit('session_data', `${JSON.stringify(sessions[session])}`);
                     } else {
                         socket.emit('bot_msg', { message: 'No order found. Please place an order' });
-                        socket.emit('bot_items', `${JSON.stringify(items)}`);
+
+                        socket.emit('session_data', `${JSON.stringify(sessions[session])}`);
                     }
                     break;
                 case '97':
+                    sessions[session].action = option;
                     if (sessions[session].order) {
                         socket.emit('bot_msg', { message: `Your current order is: ${sessions[session].order.join(', ')}` })
+                        socket.emit('session_data', `${JSON.stringify(sessions[session])}`);
                     } else {
                         socket.emit('bot_msg', { message: 'No order found. Please place an order' });
                         socket.emit('bot_items', `${JSON.stringify(items)}`);
+                        socket.emit('session_data', `${JSON.stringify(sessions[session])}`);
                     }
                     break;
                 case '98':
+                    sessions[session].action = option;
                     if (sessions[session].orders) {
                         socket.emit('bot_msg', { message: 'Your order history:' })
                         socket.emit('bot_items', `${JSON.stringify(sessions[session].orders)}`);
+                        socket.emit('session_data', `${JSON.stringify(sessions[session])}`);
                     } else {
                         socket.emit('bot_msg', { message: 'No order found.' });
+                        socket.emit('session_data', `${JSON.stringify(sessions[session])}`);
                     }
                     break;
                 case '0':
+                    sessions[session].action = option;
+                    
                     sessions[session].order = null;
                     socket.emit('bot_msg', { message: 'Order Cancelled!' })
                     socket.emit('bot_msg', { message: 'Create another Order by selecting an option below:' });
                     socket.emit('bot_items', `${JSON.stringify(items)}`);
+
+                    sessions[session].action = '1';
+
+                    socket.emit('session_data', `${JSON.stringify(sessions[session])}`);
             }
         }
+    })
 
-        console.log(sessions)
+    socket.on('selected_item', (data) => {
+        
     })
 
 
