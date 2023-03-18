@@ -7,7 +7,6 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-app.use(express.static('public'));
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
@@ -32,13 +31,29 @@ const items = {
 io.on('connection', (socket) => {
     console.log(`a customer ${socket.id} connected`);
 
-    socket.emit('bot_welcome_msg', { message: "Welcome to Fave's Restaurant!" });
-    socket.emit('bot_options_msg', { message: "Please select an option below:" })
+    socket.emit('bot_msg', { message: "Welcome to Fave's Restaurant!" });
+    socket.emit('bot_msg', { message: "Please select an option below:" })
     socket.emit('bot_options', `${JSON.stringify(options)}`);
 
-    socket.on('customerOptions', (data) => {
-        console.log("Customer options", data);
 
+    socket.on("disconnect", () => {
+        console.log("client disconnected", socket.id);
+    });
+
+    socket.on("disconnect", () => {
+        console.log("client disconnected", socket.id);
+    });
+
+    socket.on('selected_options', (data) => {
+        console.log("Customer options: ", data);
+
+        // validate the input data
+        if (!(data in options)) {
+            socket.emit('bot_error_msg', { message: "Invalid option! Please select a valid number from below" })
+            socket.emit('bot_options', `${JSON.stringify(options)}`);
+        }
+
+        // Handle the requests
         
     })
 

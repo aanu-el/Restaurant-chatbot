@@ -39,6 +39,7 @@
       }
 
       .messages {
+        min-height: 100px;
         flex: 1;
         overflow-y: scroll;
         display: flex;
@@ -63,6 +64,11 @@
         color: #fff;
         text-align: right;
         align-self: flex-end;
+      }
+
+      #error {
+        background-color: rgb(132, 29, 29);
+        color: #fff;
       }
 
       .input {
@@ -112,16 +118,13 @@
     <div class="chatbot">
       <h2 class="heading">Fave Restaurant</h2>
 
-      <div class="messages" id="messages">
-        <!-- <div class="message received"></div>
-        <div class="message sent"></div> -->
-      </div>
+      <div class="messages" id="messages"></div>
 
       <form class="input" id="form">
         <input
           type="text"
           name="option"
-          id="option"
+          id="input"
           placeholder="Type your message here"
         />
         <button type="submit">Send</button>
@@ -132,7 +135,7 @@
     <script>
       const socket = io();
 
-      const appendEvent = (message) => {
+      const appendBotMessage = (message) => {
         const messagesWrapper = document.getElementById("messages");
         const div = document.createElement("div");
         div.setAttribute("class", "message received");
@@ -142,14 +145,30 @@
         messagesWrapper.appendChild(div);
       };
 
-      socket.on("bot_welcome_msg", (data) => {
-        const { message } = data;
-        appendEvent(message);
-      });
+      const appendBotErrorMessage = (message) => {
+        const messagesWrapper = document.getElementById("messages");
+        const div = document.createElement("div");
+        div.setAttribute("class", "message received");
+        div.setAttribute("id", "error");
+        const p = document.createElement("p");
+        p.textContent = `${message}`;
+        div.appendChild(p);
+        messagesWrapper.appendChild(div);
+      };
 
-      socket.on("bot_options_msg", (data) => {
+      const appendCustomerMessage = (message) => {
+        const messagesWrapper = document.getElementById("messages");
+        const div = document.createElement("div");
+        div.setAttribute("class", "message sent");
+        const p = document.createElement("p");
+        p.textContent = `${message}`;
+        div.appendChild(p);
+        messagesWrapper.appendChild(div);
+      };
+
+      socket.on("bot_msg", (data) => {
         const { message } = data;
-        appendEvent(message);
+        appendBotMessage(message);
       });
 
       // Returns a list of options to select from
@@ -168,15 +187,27 @@
         messagesWrapper.appendChild(optionsDiv);
       });
 
+      // Handle bot error messages
+      socket.on("bot_error_msg", (data) => {
+        const { message } = data;
+        appendBotErrorMessage(message);
+        
+      });
+
       // When the customer picks an option
       const form = document.getElementById("form");
+      const input = document.getElementById("input");
       form.addEventListener("submit", (event) => {
         event.preventDefault();
 
-        const formData = new FormData(form);
-        const option = formData.get("option");
-
-        socket.emit("customerOptions", option);
+        if (input.value) {
+          const data = input.value;
+          socket.emit("selected_options", data);
+          appendCustomerMessage(data);
+          input.value = "";
+        } else {
+          input.style.boxShadow = "0 0 3px red inset";
+        }
       });
     </script>
   </body>
