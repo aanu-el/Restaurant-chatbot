@@ -218,6 +218,21 @@
         messagesWrapper.appendChild(optionsDiv);
       });
 
+      // Returns a list of item menu options to select from
+      socket.on("bot_order_history", (data) => {
+        const messagesWrapper = document.getElementById("messages");
+        const optionsDiv = document.createElement("div");
+        optionsDiv.setAttribute("class", "message received");
+        const message = JSON.parse(data);
+
+        for (let key in message) {
+          const p = document.createElement("p");
+          p.textContent = `Order ${key} : "${message[key]}"`;
+          optionsDiv.appendChild(p);
+        }
+        messagesWrapper.appendChild(optionsDiv);
+      });
+
       // Gets and store session data
       socket.on("session_data", (data) => {
         const session = JSON.parse(data);
