@@ -119,7 +119,7 @@ io.on('connection', (socket) => {
 
                     if (sessions[session].orders) {
                         socket.emit('bot_msg', { message: 'Your order history:' })
-                        socket.emit('bot_items', `${JSON.stringify(sessions[session].orders)}`);
+                        socket.emit('bot_order_history', `${JSON.stringify(sessions[session].orders)}`);
                         socket.emit('session_data', `${JSON.stringify(sessions[session])}`);
                     } else {
                         socket.emit('bot_msg', { message: 'No order found.' });
@@ -136,7 +136,7 @@ io.on('connection', (socket) => {
                         socket.emit('bot_options', `${JSON.stringify(options)}`);
                     } else {
                         socket.emit('bot_msg', { message: 'No order found.' });
-                        socket.emit('bot_msg', { message: 'Create Order by selecting an option 1' });
+                        socket.emit('bot_msg', { message: 'Create Order by selecting option 1' });
                         socket.emit('bot_options', `${JSON.stringify(options)}`);
                     }
             }
