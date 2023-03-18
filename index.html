@@ -215,6 +215,7 @@
 
           if (customer_session_data.action == "1") {
             socket.emit("selected_item", data);
+            input.value = "";
             return;
           }
 
