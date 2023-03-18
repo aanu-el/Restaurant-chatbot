@@ -166,6 +166,7 @@
         messagesWrapper.appendChild(div);
       };
 
+      // Bot messages
       socket.on("bot_msg", (data) => {
         const { message } = data;
         appendBotMessage(message);
@@ -191,7 +192,6 @@
       socket.on("bot_error_msg", (data) => {
         const { message } = data;
         appendBotErrorMessage(message);
-        
       });
 
       // When the customer picks an option
@@ -209,6 +209,24 @@
           input.style.boxShadow = "0 0 3px red inset";
         }
       });
+
+      // Handle Customers Requests
+      socket.on("bot_items", (data) => {
+        const messagesWrapper = document.getElementById("messages");
+        const optionsDiv = document.createElement("div");
+        optionsDiv.setAttribute("class", "message received");
+        const message = JSON.parse(data);
+
+        for (let key in message) {
+          const p = document.createElement("p");
+          p.textContent = `Select ${key} to "${message[key]}"`;
+          optionsDiv.appendChild(p);
+        }
+
+        messagesWrapper.appendChild(optionsDiv);
+      });
+
+      
     </script>
   </body>
 </html>
