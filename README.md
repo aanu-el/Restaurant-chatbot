@@ -8,4 +8,4 @@
 - run `npm run start` to run the application
 
 ### Live URL
-https://blogging-api-x32y.onrender.com/
+https://fave-chatbox.onrender.com/
